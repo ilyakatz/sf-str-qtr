@@ -4,7 +4,18 @@
   "version": "1.0",
   "description": "A Chrome extension using React and TypeScript",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "https://*",
+    "storage",
+    "tabs"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "all_frames": true,
+      "js": ["contentscript.js"],
+       "enabled": true
+    }
   ],
   "action": {
     "default_popup": "popup.html",
@@ -21,6 +32,6 @@
   },
   "browser_action": {
     "default_popup": "popup.html",
-    "height": 400 
+    "height": 400
   }
 }
