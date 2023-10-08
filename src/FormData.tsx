@@ -1,23 +1,34 @@
 // src/FormData.tsx
 
-import React, { useState, useEffect } from 'react';
-import FormDataItem from './FormDataItem'; // Import the FormDataItem type
-import { fillInForm } from './helpers';
-import './FormData.css'; // Import the CSS file
+import React, { useState, useEffect } from "react";
+import FormDataItem from "./FormDataItem"; // Import the FormDataItem type
+import { fillInForm } from "./helpers";
+import "./FormData.css"; // Import the CSS file
 
 const initialFormDataItem: FormDataItem = {
-  currentQuarter: '',
-  currentYear: '', // Initialize as an empty string
-  airbnbId: '',
-  checkIn: '',
-  checkOut: '',
-  typeOfStay: 'Hosted',
+  currentQuarter: "",
+  currentYear: "", // Initialize as an empty string
+  airbnbId: "",
+  checkIn: "",
+  checkOut: "",
+  typeOfStay: "Hosted",
 };
 
 const FormData: React.FC = () => {
-  const [formData, setFormData] = useState<FormDataItem[]>([initialFormDataItem]);
-  const [currentYear, setCurrentYear] = useState<string>(''); // State variable for current year
+  const [formData, setFormData] = useState<FormDataItem[]>([
+    initialFormDataItem,
+  ]);
+  const [currentYear, setCurrentYear] = useState<string>(""); // State variable for current year
 
+  // const handleChange = (
+  //   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  //   index: number
+  // ) => {
+  //   const { name, value } = e.target;
+  //   const updatedFormData = [...formData];
+  //   updatedFormData[index] = { ...updatedFormData[index], [name]: value };
+  //   setFormData(updatedFormData);
+  // };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -27,6 +38,10 @@ const FormData: React.FC = () => {
     const updatedFormData = [...formData];
     updatedFormData[index] = { ...updatedFormData[index], [name]: value };
     setFormData(updatedFormData);
+
+    // Update stored values in Chrome Storage
+    // @ts-ignore
+    chrome.storage.local.set({ [name]: value });
   };
 
   const handleAddRow = () => {
@@ -44,8 +59,31 @@ const FormData: React.FC = () => {
     setCurrentYear(year.toString());
   }, []); // Empty dependency array ensures this effect runs once
 
+  useEffect(() => {
+    // Get the current year when the component mounts
+    const year = new Date().getFullYear();
+    setCurrentYear(year.toString());
 
-    return (
+    // Retrieve values from Chrome Storage and set them as defaults
+    // @ts-ignore
+    chrome.storage.local.get(
+      ["currentQuarter", "currentYear", "airbnbId"],
+      (result: any) => {
+        if (result.currentQuarter) {
+          initialFormDataItem.currentQuarter = result.currentQuarter;
+        }
+        if (result.currentYear) {
+          initialFormDataItem.currentYear = result.currentYear;
+        }
+        if (result.airbnbId) {
+          initialFormDataItem.airbnbId = result.airbnbId;
+        }
+        setFormData([initialFormDataItem]);
+      }
+    );
+  }, []);
+
+  return (
     <div>
       <h1>Enter Data</h1>
       <table>
@@ -128,8 +166,12 @@ const FormData: React.FC = () => {
           ))}
         </tbody>
       </table>
-      <button type="button" onClick={handleAddRow}>+</button>
-      <button type="button" onClick={handleSubmit}>Submit</button>
+      {/* <button type="button" onClick={handleAddRow}>
+        +
+      </button> */}
+      <button type="button" onClick={handleSubmit}>
+        Submit
+      </button>
     </div>
   );
 };
