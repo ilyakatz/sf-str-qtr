@@ -13,22 +13,16 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "all_frames": true,
-      "js": ["contentscript.js"],
+      "js": ["./build/contentscript.js"],
        "enabled": true
     }
   ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "build/images/icon16.png",
-      "48": "build/images/icon48.png",
-      "128": "build/images/icon128.png"
     }
   },
   "icons": {
-    "16": "build/images/icon16.png",
-    "48": "build/images/icon48.png",
-    "128": "build/images/icon128.png"
   },
   "browser_action": {
     "default_popup": "popup.html",
