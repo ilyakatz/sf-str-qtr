@@ -12,20 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fillOutForm } from "./FilloutForm";
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-// @ts-ignore
-chrome.runtime.onMessage.addListener(
-  // @ts-ignore
-  (message: { data: FormDataItem[] }, sender, sendResponse) => {
-    const formData = message.data;
-    fillOutForm(
-      formData[0].typeOfStay,
-      formData[0].currentQuarter,
-      formData[0].currentYear,
-      formData[0].checkIn + "/" + formData[0].currentYear,
-      formData[0].checkOut + "/" + formData[0].currentYear,
-      formData[0].airbnbId
-    );
-  }
-);
+module.exports = function override(config, env) {
+  // Add a new entry point for contentscript.js
+  config.entry = {
+    main: ["./src/index.tsx"],
+    contentscript: ["./src/contentscript.ts"],
+  };
+  return config;
+};

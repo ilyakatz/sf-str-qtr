@@ -1,6 +1,6 @@
 
 pnpm i
-pnpm run build
+pnpm run build-custom
 node copyBuild.js
 
 # Change /static to be static

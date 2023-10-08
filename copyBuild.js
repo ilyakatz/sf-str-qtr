@@ -1,11 +1,11 @@
 // Copyright 2023 ilya
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,41 +27,64 @@
 //   console.error('Source directory does not exist. Please check the path.');
 // }
 
+const fs = require("fs-extra");
+const path = require("path");
 
-const fs = require('fs-extra');
-const path = require('path');
-
-const sourceDirectory = path.join(__dirname, 'build'); // Replace 'path-to-react-app' with the actual path to your React app
-const destinationDirectory = path.join(__dirname, 'chrome', 'build'); // Change 'build' to the desired destination folder name
+const sourceDirectory = path.join(__dirname, "build"); // Replace 'path-to-react-app' with the actual path to your React app
+const destinationDirectory = path.join(__dirname, "chrome", "build"); // Change 'build' to the desired destination folder name
 
 // Check if the source directory exists
 if (!fs.existsSync(sourceDirectory)) {
-  console.error('Source directory does not exist. Please check the path.');
+  console.error("Source directory does not exist. Please check the path.");
   process.exit(1);
 }
 
 // Copy the 'build' folder to the destination directory
 fs.copySync(sourceDirectory, destinationDirectory);
 
-console.log('Build folder copied successfully.');
+console.log("Build folder copied successfully.");
 
 // Modify the index.html file to replace "/static" with "static"
-const indexPath = path.join(destinationDirectory, 'index.html');
-fs.readFile(indexPath, 'utf8', (err, data) => {
+const indexPath = path.join(destinationDirectory, "index.html");
+fs.readFile(indexPath, "utf8", (err, data) => {
   if (err) {
-    console.error('Error reading index.html:', err);
+    console.error("Error reading index.html:", err);
     process.exit(1);
   }
 
   // Replace "/static" with "static" in the HTML content
-  const modifiedContent = data.replace(/\/static/g, 'static');
+  const modifiedContent = data.replace(/\/static/g, "static");
 
   // Write the modified content back to index.html
-  fs.writeFile(indexPath, modifiedContent, 'utf8', (err) => {
+  fs.writeFile(indexPath, modifiedContent, "utf8", (err) => {
     if (err) {
-      console.error('Error writing modified index.html:', err);
+      console.error("Error writing modified index.html:", err);
       process.exit(1);
     }
-    console.log('index.html modified successfully.');
+    console.log("index.html modified successfully.");
   });
+
+  const contentscriptFile = fs
+    .readdirSync(path.join(destinationDirectory, "static", "js"))
+    .find((file) => /^contentscript\.[a-f0-9]{8}\.js$/.test(file));
+
+  if (contentscriptFile) {
+    const destinationFile = contentscriptFile.replace(
+      /contentscript\.[a-f0-9]{8}\.js$/,
+      "contentscript.js"
+    );
+    fs.renameSync(
+      path.join(destinationDirectory, "static", "js", contentscriptFile),
+      path.join(destinationDirectory, destinationFile)
+    );
+
+    console.log(
+      `Renamed ${contentscriptFile} to contentscript.js and moved it to the 'chrome' directory.`
+    );
+  } else {
+    console.error(
+      "Unable to find contentscript.{hash}.js in the build/static/js folder."
+    );
+    process.exit(1);
+  }
 });
